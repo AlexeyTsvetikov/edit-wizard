@@ -2,18 +2,12 @@ package ru.tsvetikov.editwizard.bibliography.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.tsvetikov.editwizard.bibliography.engine.BibliographyEngine;
 import ru.tsvetikov.editwizard.bibliography.engine.model.Rule;
-import ru.tsvetikov.editwizard.bibliography.model.BibliographyLineError;
 import ru.tsvetikov.editwizard.bibliography.model.BibliographyRule;
-import ru.tsvetikov.editwizard.bibliography.model.BibliographyValidationLine;
-import ru.tsvetikov.editwizard.bibliography.model.BibliographyValidationSession;
 import ru.tsvetikov.editwizard.bibliography.repository.BibliographyRuleRepository;
-import ru.tsvetikov.editwizard.bibliography.repository.BibliographyValidationSessionRepository;
 import ru.tsvetikov.editwizard.core.dto.ValidationPage;
 import ru.tsvetikov.editwizard.core.dto.ValidationResult;
-import ru.tsvetikov.editwizard.security.model.SecurityUser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +19,6 @@ public class BibliographyService {
 
     private final BibliographyEngine engine;
     private final BibliographyRuleRepository ruleRepository;
-    private final BibliographyValidationSessionRepository sessionRepository;
 
 
     public ValidationPage validate(String rawText) {

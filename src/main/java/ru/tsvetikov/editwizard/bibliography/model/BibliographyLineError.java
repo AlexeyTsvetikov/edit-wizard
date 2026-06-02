@@ -29,7 +29,7 @@ public class BibliographyLineError {
     @Column(name = "error_length", nullable = false)
     private Integer errorLength;
 
-    @Column(name = "error_message", nullable = false, length = 255)
+    @Column(name = "error_message", nullable = false)
     private String errorMessage;
 
     @Column(name = "expected_view", columnDefinition = "TEXT")

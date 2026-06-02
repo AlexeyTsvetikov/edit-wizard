@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.tsvetikov.editwizard.bibliography.service.BibliographyService;
 import ru.tsvetikov.editwizard.core.dto.ValidationPage;
-import ru.tsvetikov.editwizard.security.model.SecurityUser;
 
 @Controller
 @RequestMapping("/bibliography")
