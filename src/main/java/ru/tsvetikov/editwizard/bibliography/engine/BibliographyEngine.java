@@ -27,10 +27,8 @@ public class BibliographyEngine {
             return emptyResult(lineNumber, rawLine);
         }
 
-        // 1. Классификация
         SourceType type = classifier.classify(rawLine);
 
-        // 2. UNKNOWN — особая обработка
         if (type == SourceType.UNKNOWN) {
             return new ValidationResult(
                     lineNumber,
@@ -42,7 +40,6 @@ public class BibliographyEngine {
             );
         }
 
-        // 3. Парсинг — ищем подходящий парсер
         BibliographyParser parser = findParser(type);
         if (parser == null) {
             return new ValidationResult(
@@ -57,10 +54,8 @@ public class BibliographyEngine {
 
         ParsedRecord record = parser.parse(rawLine);
 
-        // 4. Валидация
         var errors = rulesEngine.apply(record, rules);
 
-        // 5. Подсветка
         String html = errors.isEmpty()
                 ? highlighter.highlight(rawLine, List.of())
                 : highlighter.highlight(rawLine, errors);

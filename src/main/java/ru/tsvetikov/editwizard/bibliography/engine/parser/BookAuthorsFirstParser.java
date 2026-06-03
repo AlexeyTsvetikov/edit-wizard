@@ -22,7 +22,6 @@ public class BookAuthorsFirstParser implements BibliographyParser {
         String line = rawLine.trim();
         int pos = 0;
 
-        // 1. Авторы: от начала до точки с пробелом после инициалов
         int authorsEnd = findAuthorsEnd(line, pos);
         if (authorsEnd > pos) {
             String value = line.substring(pos, authorsEnd).trim();
@@ -30,7 +29,6 @@ public class BookAuthorsFirstParser implements BibliographyParser {
             pos = skipDelimiter(line, authorsEnd, ". ");
         }
 
-        // 2. Заглавие: от текущей позиции до " . — " перед городом
         int titleEnd = findTitleEnd(line, pos);
         if (titleEnd > pos) {
             String value = line.substring(pos, titleEnd).trim();
@@ -38,7 +36,6 @@ public class BookAuthorsFirstParser implements BibliographyParser {
             pos = skipDelimiter(line, titleEnd, ". — ");
         }
 
-        // 3. Сведения об издании (опционально): "2-е изд., испр. и доп. — "
         if (pos < line.length() && isEdition(line, pos)) {
             int editionEnd = findEditionEnd(line, pos);
             String value = line.substring(pos, editionEnd).trim();
@@ -46,7 +43,6 @@ public class BookAuthorsFirstParser implements BibliographyParser {
             pos = skipDelimiter(line, editionEnd, ". — ");
         }
 
-        // 4. Город: до двоеточия
         int cityEnd = line.indexOf(":", pos);
         if (cityEnd > pos) {
             String value = line.substring(pos, cityEnd).trim();
@@ -54,7 +50,6 @@ public class BookAuthorsFirstParser implements BibliographyParser {
             pos = skipDelimiter(line, cityEnd, ": ");
         }
 
-        // 5. Издательство: до запятой перед годом
         int publisherEnd = line.indexOf(",", pos);
         if (publisherEnd > pos) {
             String value = line.substring(pos, publisherEnd).trim();
@@ -62,19 +57,15 @@ public class BookAuthorsFirstParser implements BibliographyParser {
             pos = skipDelimiter(line, publisherEnd, ", ");
         }
 
-        // 6. Год: до точки
         int yearEnd = findYearEnd(line, pos);
         String yearValue = line.substring(pos, Math.min(yearEnd, line.length())).trim();
-        // Проверяем, что это действительно год (цифры) — иначе пропускаем
         if (yearValue.matches("\\d{2,4}") && yearEnd > pos) {
             tokens.put("YEAR", new ParsedToken("YEAR", yearValue, pos, yearEnd));
             pos = skipDelimiter(line, yearEnd, ". — ");
         } else if (yearEnd > pos) {
-            // Не год — пропускаем, это уже страницы
             pos = yearEnd;
         }
 
-        // 7. Страницы: до конца строки
         if (pos < line.length()) {
             String value = line.substring(pos).trim();
             tokens.put("PAGES", new ParsedToken("PAGES", value, pos, line.length()));
@@ -83,43 +74,32 @@ public class BookAuthorsFirstParser implements BibliographyParser {
         return new ParsedRecord(SourceType.BOOK_AUTHORS_FIRST, rawLine, tokens);
     }
 
-    // ==================== Вспомогательные методы ====================
-
-    /** Найти конец блока авторов: после последнего инициала перед точкой */
     private int findAuthorsEnd(String line, int from) {
-        // Ищем паттерн: Фамилия И. О. (точка после второго инициала)
         int dot = line.indexOf(".", from);
         if (dot < 0) return from;
-        // Пропускаем возможные пробелы после точки — ищем точку с пробелом дальше
         int end = line.indexOf(". ", dot);
         if (end < 0) {
-            // Если ". " нет, возможно конец строки — берём до следующей большой буквы (начало названия)
             end = dot;
         }
-        return end + 1; // включаем последнюю точку
+        return end + 1;
     }
 
-    /** Конец заглавия: перед " . — " или " : " перед городом */
     private int findTitleEnd(String line, int from) {
         int dash = line.indexOf(". —", from);
         if (dash >= 0) return dash;
-        // Если нет ". —", ищем " — " (без точки, ошибка редактора)
         dash = line.indexOf(" —", from);
         return dash >= 0 ? dash : line.length();
     }
 
-    /** Проверка, что в текущей позиции — сведения об издании */
     private boolean isEdition(String line, int from) {
         return line.substring(from).matches("^\\d+-е\\s+изд.*");
     }
 
-    /** Конец сведений об издании */
     private int findEditionEnd(String line, int from) {
         int dash = line.indexOf(". —", from);
         return dash >= 0 ? dash : line.indexOf(" —", from);
     }
 
-    /** Пропустить разделитель и вернуть новую позицию */
     private int skipDelimiter(String line, int from, String delimiter) {
         int newPos = from;
         for (int i = 0; i < delimiter.length() && newPos < line.length(); i++) {
@@ -134,7 +114,6 @@ public class BookAuthorsFirstParser implements BibliographyParser {
         return newPos;
     }
 
-    /** Найти конец года — точка перед " — " или конец строки */
     private int findYearEnd(String line, int from) {
         int dash = line.indexOf(" —", from);
         if (dash >= 0) {

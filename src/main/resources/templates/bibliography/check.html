@@ -1,86 +1,354 @@
-<!-- app/src/main/resources/templates/bibliography/check.html -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Проверка списка литературы</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Проверка списка литературы | Верификация источников</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background: linear-gradient(135deg, #e8def0 0%, #d4c4e8 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            padding: 2rem 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
 
         .container {
-            background: white;
-            border-radius: 8px;
+            max-width: 1300px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 28px;
             padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
         }
+
+        h1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 700;
+            font-size: 1.75rem;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #6c757d;
+            border-left: 4px solid #764ba2;
+            padding-left: 1rem;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
         .btn-primary {
-            background-color: #7c4d9e;
-            border-color: #7c4d9e;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 0.5rem;
         }
 
         .btn-primary:hover {
-            background-color: #6b3f8a;
-            border-color: #6b3f8a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #5a67d8 0%, #6b3f8a 100%);
+        }
+
+        textarea {
+            border-radius: 16px !important;
+            border: 2px solid #e9ecef;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            background: #fafbff;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            line-height: 1.6;
+        }
+
+        textarea:focus {
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.1);
+            background: white;
+        }
+
+        .info-bar {
+            margin-top: 2rem;
+            padding-top: 0.5rem;
+        }
+
+        .source-text {
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            background: #fafbfc;
+            padding: 1rem;
+            border-radius: 12px;
+        }
+
+        .accordion-item {
+            border-radius: 16px !important;
+            overflow: hidden;
+        }
+
+        .accordion-button {
+            background: #f8f9fa;
+            color: #2c3e50;
+            font-weight: 600;
+            padding: 1rem 1.25rem;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background: #f8f9fa;
+            color: #2c3e50;
+            box-shadow: none;
+        }
+
+        .accordion-button:focus {
+            box-shadow: none;
+            border-color: transparent;
+        }
+
+        code {
+            background: #f1f3f5;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+        }
+
+        .error-row {
+            background: #fef8f8;
+            transition: background 0.2s;
+        }
+
+        .error-row:hover {
+            background: #fef0f0;
+        }
+
+        .unknown-row {
+            background: #fefaf5;
+            transition: background 0.2s;
+        }
+
+        .unknown-row:hover {
+            background: #fef5e8;
+        }
+
+        .success-row {
+            background: #f8fef8;
+            transition: background 0.2s;
+        }
+
+        .success-row:hover {
+            background: #f0fef0;
         }
     </style>
 </head>
-<body class="py-4">
-<div class="container">
-    <h1 class="mb-4">Проверка списка литературы</h1>
+<body>
+<div class="container animate__animated animate__fadeInUp">
+    <h1><i class="bi bi-journal-bookmark-fill"></i> Проверка списка литературы</h1>
+    <div class="subtitle">Автоматическая верификация оформления источников по ГОСТ</div>
 
     <form method="post" th:action="@{/bibliography}">
         <div class="mb-3">
-            <label for="sourceText" class="form-label">
-                Вставьте список литературы
-                <small class="text-muted">(один источник — одна строка)</small>
+            <label for="sourceText" class="form-label fw-semibold">
+                <i class="bi bi-textarea-t"></i> Исходный список литературы
+                <small class="text-muted fw-normal">(один источник — одна строка)</small>
             </label>
-            <textarea class="form-control font-monospace" id="sourceText"
-                      name="sourceText" rows="12"
+            <textarea class="form-control" id="sourceText"
+                      name="sourceText" rows="12" placeholder="Пример:&#10;Иванов И.И. Основы программирования. М.: Наука, 2020. 300 с.&#10;Петров П.П., Сидоров С.С. Алгоритмы и структуры данных // Журнал «Информатика». 2019. Том 15. № 3. С. 45-67."
                       th:text="${page != null ? page.originalText() : ''}"></textarea>
         </div>
-        <button type="submit" class="btn btn-primary">Проверить</button>
+        <button type="submit" class="btn btn-primary">
+             Проверить список <i class="bi bi-magic"></i>
+        </button>
     </form>
 
     <th:block th:if="${page != null}">
-        <div class="mt-4">
-            <h3>
-                Проверено: <span th:text="${page.totalLines()}">0</span> строк,
-                ошибок: <span class="text-danger" th:text="${page.totalErrors()}">0</span>,
-                не распознано: <span class="text-warning" th:text="${page.linesWithUnknownType()}">0</span>
-            </h3>
+        <div class="info-bar">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-files text-secondary"></i>
+                <span class="text-secondary">Всего строк:</span>
+                <strong class="fs-5" th:text="${page.totalLines}" id="totalLinesSpan"></strong>
+            </div>
         </div>
 
-        <div th:each="result : ${page.results()}" class="card mb-2">
-            <div class="card-header py-1">
-                <strong>Строка [[${result.lineNumber()}]]</strong>
-                <span class="badge ms-2" th:classappend="${result.typeDetected()} ? 'bg-secondary' : 'bg-warning text-dark'"
-                      th:text="${result.sourceType()}">ТИП</span>
-                <span th:if="${!result.hasErrors() && result.typeDetected()}" class="text-success ms-2">✓</span>
-            </div>
-            <div class="card-body py-2">
-                <div class="font-monospace" th:utext="${result.highlightedHtml()}"></div>
-
-                <th:block th:if="${result.hasErrors()}">
-                    <div th:each="error : ${result.errors()}" class="mt-2 small">
-                        <span class="text-danger">❌</span>
-                        <strong th:text="${error.ruleCode()}"></strong>:
-                        <span th:text="${error.message()}"></span>
-                        <span th:if="${error.expectedView() != null}">
-                                → <code th:text="${error.expectedView()}"></code>
-                            </span>
-                        <span class="text-muted">
-                                (поз. [[${error.charStart()}]]–[[${error.charEnd()}]])
-                            </span>
+        <!-- Ошибки -->
+        <div class="accordion-item border-0 shadow-sm mb-3" style="border-radius: 16px; overflow: hidden;">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed fw-semibold" style="background: #f8f9fa;"
+                        data-bs-toggle="collapse" data-bs-target="#errorsCollapse">
+                    <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+                    Ошибки <span class="ms-1" id="errorsCount">(0)</span>
+                </button>
+            </h2>
+            <div id="errorsCollapse" class="accordion-collapse collapse">
+                <div class="accordion-body p-0" id="errorsList">
+                    <div th:each="result : ${page.results}" th:if="${result.hasErrors}"
+                         class="border-bottom p-3 error-row"
+                         th:data-error="true"
+                         th:data-error-count="${#lists.size(result.errors)}">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <strong class="text-secondary"><i class="bi bi-hash"></i> Строка <span th:text="${result.lineNumber}"></span></strong>
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle error-count-badge"
+                                  style="font-size: 0.7rem; padding: 0.25rem 0.6rem;">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                        <span th:text="${#lists.size(result.errors)}" class="error-number"></span>
+                        <span class="error-text-plural"></span>
+                    </span>
+                        </div>
+                        <div class="source-text mb-3" th:utext="${result.highlightedHtml}"></div>
+                        <div th:each="error : ${result.errors}" class="small">
+                            <div style="border-left: 2px solid #dc3545; padding-left: 10px;">
+                                <div>
+                                    <i class="bi bi-exclamation-circle-fill text-danger me-1"></i>
+                                    <span class="text-danger" th:text="${error.message}"></span>
+                                </div>
+                                <div th:if="${error.expectedView != null}" class="text-muted mt-1" style="margin-left: 0;">
+                                    <i class="bi bi-eye-fill"></i> Ожидается: <code th:text="${error.expectedView}"></code>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </th:block>
+                    <div th:if="${page.totalErrors == 0}" class="p-4 text-center text-muted">
+                        <i class="bi bi-check-circle"></i> Нет ошибок
+                    </div>
+                </div>
             </div>
+        </div>
+
+        <!-- Не распознано -->
+        <div class="accordion-item border-0 shadow-sm mb-3" style="border-radius: 16px; overflow: hidden;">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed fw-semibold" style="background: #f8f9fa;"
+                        data-bs-toggle="collapse" data-bs-target="#unknownCollapse">
+                    <i class="bi bi-question-diamond-fill text-warning me-2"></i>
+                    Не распознано <span class="ms-1" id="unknownCount">(0)</span>
+                </button>
+            </h2>
+            <div id="unknownCollapse" class="accordion-collapse collapse">
+                <div class="accordion-body p-0" id="unknownList">
+                    <div th:each="result : ${page.results}" th:if="!${result.typeDetected}"
+                         class="border-bottom p-3 unknown-row" th:data-unknown="true">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <strong class="text-secondary"><i class="bi bi-hash"></i> Строка <span th:text="${result.lineNumber}"></span></strong>
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" style="font-size: 0.7rem; padding: 0.25rem 0.6rem;">
+                        <i class="bi bi-question-diamond-fill me-1"></i> Не распознано
+                    </span>
+                        </div>
+                        <div class="source-text mb-2" th:utext="${result.highlightedHtml}"></div>
+                        <div class="d-flex align-items-start gap-2" style="border-left: 2px solid #e67700; padding-left: 10px;">
+                            <i class="bi bi-lightbulb-fill text-warning mt-1 flex-shrink-0"></i>
+                            <span class="text-warning">Не удалось определить тип источника</span>
+                        </div>
+                    </div>
+                    <div th:if="${page.linesWithUnknownType == 0}" class="p-4 text-center text-muted">
+                        <i class="bi bi-check-circle"></i> Нет нераспознанных источников
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Корректные -->
+        <div class="accordion-item border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed fw-semibold" style="background: #f8f9fa;"
+                        data-bs-toggle="collapse" data-bs-target="#successCollapse">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    Корректные <span class="ms-1" id="successCount"></span>
+                </button>
+            </h2>
+            <div id="successCollapse" class="accordion-collapse collapse">
+                <div class="accordion-body p-0" id="successList">
+                    <div th:each="result : ${page.results}" th:if="${!result.hasErrors and result.typeDetected}"
+                         class="border-bottom p-3 success-row" th:data-success="true">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <strong class="text-secondary"><i class="bi bi-hash"></i> Строка <span th:text="${result.lineNumber}"></span></strong>
+                            <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle" style="font-size: 0.7rem; padding: 0.25rem 0.6rem;">
+                        <i class="bi bi-check-circle-fill me-1"></i> Корректно
+                    </span>
+                        </div>
+                        <div class="source-text mt-2" th:utext="${result.highlightedHtml}"></div>
+                    </div>
+                    <div th:if="${page.totalLines == page.totalErrors + page.linesWithUnknownType}" class="p-4 text-center text-muted">
+                        Нет корректных строк
+                    </div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+
+    <th:block th:unless="${page != null}">
+        <div class="text-center mt-5 py-5 text-muted">
+            <i class="bi bi-journal-bookmark-fill" style="font-size: 3rem;"></i>
+            <p class="mt-3">Вставьте список литературы и нажмите «Проверить список»</p>
+            <small class="d-block text-muted">
+                <i class="bi bi-info-circle-fill"></i> Поддерживаются книги, статьи, диссертации, электронные ресурсы и другие типы источников
+            </small>
         </div>
     </th:block>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Функция склонения слова "ошибка"
+    function declensionError(count) {
+        const lastDigit = count % 10;
+        const lastTwoDigits = count % 100;
+
+        if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
+            return 'ошибок';
+        }
+        if (lastDigit === 1) {
+            return 'ошибка';
+        }
+        if (lastDigit >= 2 && lastDigit <= 4) {
+            return 'ошибки';
+        }
+        return 'ошибок';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. Обработка баджей с количеством ошибок
+        const errorBadges = document.querySelectorAll('[data-error="true"]');
+        errorBadges.forEach(badge => {
+            const errorSpan = badge.querySelector('.error-number');
+            const pluralSpan = badge.querySelector('.error-text-plural');
+            if (errorSpan && pluralSpan) {
+                const count = parseInt(errorSpan.innerText);
+                pluralSpan.innerText = ' ' + declensionError(count);
+            }
+        });
+
+        // 2. Подсчет общего количества ошибок
+        const errorRows = document.querySelectorAll('[data-error="true"]');
+        const errorsCount = errorRows.length;
+        document.getElementById('errorsCount').innerText = '(' + errorsCount + ')';
+
+        // 3. Подсчет нераспознанных
+        const unknownRows = document.querySelectorAll('[data-unknown="true"]');
+        const unknownCount = unknownRows.length;
+        document.getElementById('unknownCount').innerText = '(' + unknownCount + ')';
+
+        // 4. Подсчет корректных
+        const totalLinesElem = document.getElementById('totalLinesSpan');
+        const totalLines = totalLinesElem ? parseInt(totalLinesElem.innerText) : 0;
+        const correctCount = totalLines - errorsCount - unknownCount;
+        document.getElementById('successCount').innerText = '(' + correctCount + ')';
+    });
+</script>
 </body>
 </html>

@@ -16,7 +16,6 @@ public class HtmlHighlighter {
             return escapeHtml(rawLine);
         }
 
-        // Сортируем от конца к началу, чтобы вставка не сбивала индексы
         List<ValidationError> sorted = errors.stream()
                 .sorted(Comparator.comparingInt(ValidationError::charStart).reversed())
                 .toList();
@@ -36,9 +35,6 @@ public class HtmlHighlighter {
         return sb.toString();
     }
 
-    /**
-     * Подсветить строку с неопределённым типом — вся строка жёлтым.
-     */
     public String highlightUnknown(String rawLine) {
         return UNKNOWN_TEMPLATE.formatted(escapeHtml(rawLine));
     }

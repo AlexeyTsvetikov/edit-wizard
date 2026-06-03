@@ -13,24 +13,16 @@ public class SourceClassifier {
 
         String line = rawLine.trim();
 
-        // Порядок важен: от наиболее специфичных к общим
-
-        // Архивные документы (уникальная структура)
         if (isArchive(line)) return SourceType.ARCHIVE_DOCUMENT;
 
-        // Патенты
         if (isPatent(line)) return SourceType.PATENT;
 
-        // ГОСТ из сборника (содержит //)
         if (isGost(line) && line.contains("//")) return SourceType.GOST_FROM_COLLECTION;
 
-        // ГОСТ отдельный
         if (isGost(line)) return SourceType.GOST;
 
-        // Правила
         if (isRules(line)) return SourceType.RULES;
 
-        // Электронные ресурсы (до книг и статей, потому что могут содержать те же маркеры)
         if (isElectronicCourse(line)) return SourceType.ELECTRONIC_COURSE;
         if (isElectronicLocal(line)) return SourceType.ELECTRONIC_LOCAL;
         if (isElectronicWithDOI(line)) return SourceType.ELECTRONIC_ARTICLE_DOI;
@@ -40,20 +32,15 @@ public class SourceClassifier {
         if (isElectronicPortal(line)) return SourceType.ELECTRONIC_PORTAL;
         if (isWebsite(line)) return SourceType.ELECTRONIC_WEBSITE;
 
-        // Законодательные материалы
         if (isLegal(line)) return SourceType.LEGAL;
 
-        // Статистика
         if (isStatistical(line)) return SourceType.STATISTICAL_COLLECTION;
 
-        // Иностранные источники (латиница в начале)
         if (isForeign(line)) return SourceType.FOREIGN;
 
-        // Диссертации и авторефераты
         if (isAbstract(line)) return SourceType.ABSTRACT;
         if (isDissertation(line)) return SourceType.DISSERTATION;
 
-        // Статьи (есть //)
         if (hasArticleMarkers(line)) {
             if (isEncyclopedia(line)) return SourceType.ARTICLE_ENCYCLOPEDIA;
             if (isChapter(line)) return SourceType.CHAPTER_BOOK;
@@ -63,7 +50,6 @@ public class SourceClassifier {
             return SourceType.ARTICLE_JOURNAL_AUTHORS_FIRST;
         }
 
-        // Книги
         if (isMultivolume(line)) return SourceType.MULTIVOLUME;
         if (isUnderEditor(line)) return SourceType.BOOK_UNDER_EDITOR;
         if (hasTitleFirst(line)) return SourceType.BOOK_TITLE_FIRST;
@@ -72,7 +58,6 @@ public class SourceClassifier {
         return SourceType.UNKNOWN;
     }
 
-    // ==================== Маркеры ====================
 
     private boolean isArchive(String line) {
         return line.matches("^[А-ЯЁ]+\\..*Ф\\.\\s*\\d+.*Оп\\.\\s*\\d+.*Д\\.\\s*\\d+.*Л\\.\\s*\\d+");
@@ -163,7 +148,9 @@ public class SourceClassifier {
     }
 
     private boolean isNewspaper(String line) {
-        return line.contains("газета") || line.contains("газ.") || line.matches(".*\\d{1,2}\\s+(января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря).*");
+        return line.contains("газета") || line.contains("газ.")
+               || line.matches(".*\\d{1,2}\\s+(января|февраля|марта|апреля|мая|июня|июля|" +
+                               "августа|сентября|октября|ноября|декабря).*");
     }
 
     private boolean isMultivolume(String line) {
