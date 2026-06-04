@@ -40,6 +40,8 @@ public class SourceClassifier {
 
         if (isAbstract(line)) return SourceType.ABSTRACT;
         if (isDissertation(line)) return SourceType.DISSERTATION;
+        if (isUnderEditor(line)) return SourceType.BOOK_UNDER_EDITOR;
+
 
         if (hasArticleMarkers(line)) {
             if (isEncyclopedia(line)) return SourceType.ARTICLE_ENCYCLOPEDIA;
@@ -50,9 +52,9 @@ public class SourceClassifier {
             return SourceType.ARTICLE_JOURNAL_AUTHORS_FIRST;
         }
 
-        if (isMultivolume(line)) return SourceType.MULTIVOLUME;
-        if (isUnderEditor(line)) return SourceType.BOOK_UNDER_EDITOR;
         if (hasTitleFirst(line)) return SourceType.BOOK_TITLE_FIRST;
+        if (isMultivolume(line)) return SourceType.MULTIVOLUME;
+
         if (hasAuthors(line)) return SourceType.BOOK_AUTHORS_FIRST;
 
         return SourceType.UNKNOWN;
@@ -167,8 +169,8 @@ public class SourceClassifier {
     }
 
     private boolean hasTitleFirst(String line) {
-        return line.startsWith("Исследования по") || line.startsWith("Экономическая оценка")
-               || !line.matches("^[А-ЯЁ][а-яё]+\\s+[а-яё]+.*//.*") && line.contains("/");
+        return !line.matches("^[А-ЯЁ][а-яё]+\\s+[А-ЯЁ]\\..*")
+               && line.contains(" / ");
     }
 
     private boolean hasAuthors(String line) {

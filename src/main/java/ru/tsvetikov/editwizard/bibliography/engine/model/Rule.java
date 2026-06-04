@@ -5,5 +5,6 @@ public record Rule(
         String targetToken,
         String searchPattern,
         String message,
-        String expectedView
+        String expectedView,
+        String sourceTypes
 ) {}

@@ -28,7 +28,7 @@ public class BibliographyEngine {
         }
 
         SourceType type = classifier.classify(rawLine);
-
+        System.out.println(">>> Тип: " + type);
         if (type == SourceType.UNKNOWN) {
             return new ValidationResult(
                     lineNumber,

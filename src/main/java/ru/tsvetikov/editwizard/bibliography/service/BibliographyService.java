@@ -64,7 +64,8 @@ public class BibliographyService {
                 entity.getTargetToken(),
                 entity.getSearchPattern(),
                 entity.getName(),           // message — пока из name, потом можно отдельное поле
-                entity.getExpectedView()
+                entity.getExpectedView(),
+                entity.getSourceTypes()
         );
     }
 

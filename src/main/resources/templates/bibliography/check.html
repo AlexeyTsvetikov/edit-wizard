@@ -156,6 +156,17 @@
         .success-row:hover {
             background: #f0fef0;
         }
+        .source-text .error-highlight {
+            background: #ffd6db;
+            border-bottom: 2px solid #dc3545;
+            cursor: pointer;
+            padding: 2px 3px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+        .source-text .error-highlight:hover {
+            background: #ffc0cb;
+        }
     </style>
 </head>
 <body>
@@ -251,7 +262,7 @@
                     </span>
                         </div>
                         <div class="source-text mb-2" th:utext="${result.highlightedHtml}"></div>
-                        <div class="d-flex align-items-start gap-2" style="border-left: 2px solid #e67700; padding-left: 10px;">
+                        <div class="d-flex align-items-start gap-2" style="border-left: 2px solid #ce7e04; padding-left: 10px;">
                             <i class="bi bi-lightbulb-fill text-warning mt-1 flex-shrink-0"></i>
                             <span class="text-warning">Не удалось определить тип источника</span>
                         </div>

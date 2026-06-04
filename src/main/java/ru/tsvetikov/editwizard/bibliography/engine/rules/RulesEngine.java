@@ -16,8 +16,15 @@ public class RulesEngine {
 
     public List<ValidationError> apply(ParsedRecord record, List<Rule> rules) {
         List<ValidationError> errors = new ArrayList<>();
+        String sourceType = record.sourceType().name();
 
         for (Rule rule : rules) {
+            if (rule.sourceTypes() != null && !rule.sourceTypes().isBlank()) {
+                if (!List.of(rule.sourceTypes().split(",")).contains(sourceType)) {
+                    continue;
+                }
+            }
+
             if (rule.targetToken() == null) {
                 errors.addAll(applyToLine(rule, record.rawLine()));
             } else {
