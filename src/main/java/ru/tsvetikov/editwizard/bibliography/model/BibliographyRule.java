@@ -25,10 +25,10 @@ public class BibliographyRule {
     @Column(name = "source_types", length = 200)
     private String sourceTypes;
 
-    @Column(name = "example_text", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "example_text", nullable = false, length = 4000)
     private String exampleText;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(length = 4000)
     private String description;
 
     @Column(name = "target_token", length = 50)
@@ -37,6 +37,6 @@ public class BibliographyRule {
     @Column(name = "search_pattern", length = 500)
     private String searchPattern;
 
-    @Column(name = "expected_view", columnDefinition = "TEXT")
+    @Column(name = "expected_view", length = 4000)
     private String expectedView;
 }

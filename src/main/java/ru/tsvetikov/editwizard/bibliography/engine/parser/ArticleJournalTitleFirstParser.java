@@ -23,45 +23,29 @@ public class ArticleJournalTitleFirstParser implements BibliographyParser {
         String line = rawLine.trim();
         int pos = 0;
 
-        // 1. Заглавие — до " / "
+        // Заглавие — до " / "
         int titleEnd = line.indexOf(" / ", pos);
-        if (titleEnd > pos) {
-            tokens.put("TITLE", new ParsedToken("TITLE", line.substring(pos, titleEnd).trim(), pos, titleEnd));
-            pos = titleEnd + 3;
-        }
+        pos = TokenExtractor.extractToken(line, pos, titleEnd, "TITLE", "", tokens);
+        if (pos < line.length() && line.startsWith(" / ", pos)) pos += 3;
 
-        // 2. Авторы — от " / " до " // "
+        // Авторы — от " / " до " // "
         int authorsEnd = line.indexOf(" // ", pos);
-        if (authorsEnd > pos) {
-            tokens.put("AUTHORS", new ParsedToken("AUTHORS", line.substring(pos, authorsEnd).trim(), pos, authorsEnd));
-            pos = authorsEnd + 4;
-        }
+        pos = TokenExtractor.extractToken(line, pos, authorsEnd, "AUTHORS", "", tokens);
+        if (pos < line.length() && line.startsWith(" // ", pos)) pos += 4;
 
-        // 3. Журнал — до ". — "
+        // Журнал
         int journalEnd = TokenExtractor.findBlockEnd(line, pos);
-        if (journalEnd > pos) {
-            tokens.put("JOURNAL", new ParsedToken("JOURNAL", line.substring(pos, journalEnd).trim(), pos, journalEnd));
-            pos = TokenExtractor.skipDelimiter(line, journalEnd, ". — ");
-        }
+        pos = TokenExtractor.extractToken(line, pos, journalEnd, "JOURNAL", ". — ", tokens);
 
-        // 4. Год
-        int yearEnd = TokenExtractor.findBlockEnd(line, pos);
-        if (yearEnd > pos) {
-            tokens.put("YEAR", new ParsedToken("YEAR", line.substring(pos, yearEnd).trim(), pos, yearEnd));
-            pos = TokenExtractor.skipDelimiter(line, yearEnd, ". — ");
-        }
+        // Год
+        pos = TokenExtractor.extractYear(line, pos, tokens);
 
-        // 5. Номер
+        // Номер
         int issueEnd = TokenExtractor.findBlockEnd(line, pos);
-        if (issueEnd > pos) {
-            tokens.put("ISSUE", new ParsedToken("ISSUE", line.substring(pos, issueEnd).trim(), pos, issueEnd));
-            pos = TokenExtractor.skipDelimiter(line, issueEnd, ". — ");
-        }
+        pos = TokenExtractor.extractToken(line, pos, issueEnd, "ISSUE", ". — ", tokens);
 
-        // 6. Страницы
-        if (pos < line.length()) {
-            tokens.put("PAGES", new ParsedToken("PAGES", line.substring(pos).trim(), pos, line.length()));
-        }
+        // Страницы
+        TokenExtractor.extractPages(line, pos, tokens);
 
         return new ParsedRecord(SourceType.ARTICLE_JOURNAL_TITLE_FIRST, rawLine, tokens);
     }

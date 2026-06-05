@@ -33,7 +33,7 @@ public class BibliographyEngine {
             return new ValidationResult(
                     lineNumber,
                     rawLine,
-                    "UNKNOWN",
+                    SourceType.UNKNOWN.getDisplayName(),
                     false,
                     List.of(),
                     highlighter.highlightUnknown(rawLine)
@@ -45,7 +45,7 @@ public class BibliographyEngine {
             return new ValidationResult(
                     lineNumber,
                     rawLine,
-                    type.name(),
+                    type.getDisplayName(),
                     true,
                     List.of(),
                     highlighter.highlight(rawLine, List.of())
@@ -63,7 +63,7 @@ public class BibliographyEngine {
         return new ValidationResult(
                 lineNumber,
                 rawLine,
-                type.name(),
+                type.getDisplayName(),
                 true,
                 errors,
                 html

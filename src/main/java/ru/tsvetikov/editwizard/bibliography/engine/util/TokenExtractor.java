@@ -68,6 +68,18 @@ public class TokenExtractor {
         return pos;
     }
 
+    public static int extractYear(String line, int from, Map<String, ParsedToken> tokens) {
+        int yearEnd = findBlockEnd(line, from);
+        if (yearEnd > from) {
+            String value = line.substring(from, yearEnd).trim();
+            if (value.matches("\\d{4}")) {
+                tokens.put("YEAR", new ParsedToken("YEAR", value, from, yearEnd));
+                return skipDelimiter(line, yearEnd, ". — ");
+            }
+        }
+        return from;
+    }
+
     public static void extractBookTail(String line, int from, Map<String, ParsedToken> tokens) {
         int pos = from;
 
@@ -110,5 +122,71 @@ public class TokenExtractor {
             String value = line.substring(pos).trim();
             tokens.put("PAGES", new ParsedToken("PAGES", value, pos, line.length()));
         }
+    }
+
+    public static int extractAuthorsAndTitle(String line, Map<String, ParsedToken> tokens) {
+        int pos = extractAuthors(line, tokens);
+
+        int titleEnd = line.indexOf(" // ", pos);
+        if (titleEnd > pos) {
+            tokens.put("TITLE", new ParsedToken("TITLE", line.substring(pos, titleEnd).trim(), pos, titleEnd));
+            pos = titleEnd + 4;
+        }
+
+        return pos;
+    }
+
+    public static int extractCity(String line, int from, Map<String, ParsedToken> tokens) {
+        int cityEnd = line.indexOf(",", from);
+        if (cityEnd > from) {
+            tokens.put("CITY", new ParsedToken("CITY", line.substring(from, cityEnd).trim(), from, cityEnd));
+            return skipDelimiter(line, cityEnd, ", ");
+        }
+        return from;
+    }
+
+    public static int extractAuthors(String line, Map<String, ParsedToken> tokens) {
+        int pos = 0;
+        int authorsEnd = findAuthorsEnd(line, pos);
+        if (authorsEnd > pos) {
+            tokens.put("AUTHORS", new ParsedToken("AUTHORS", line.substring(pos, authorsEnd).trim(), pos, authorsEnd));
+            pos = skipDelimiter(line, authorsEnd, ". ");
+        }
+        return pos;
+    }
+
+    public static int extractToken(String line, int from, int end, String code, String delimiter, Map<String, ParsedToken> tokens) {
+        if (end > from) {
+            tokens.put(code, new ParsedToken(code, line.substring(from, end).trim(), from, end));
+            return delimiter.isEmpty() ? end : skipDelimiter(line, end, delimiter);
+        }
+        return from;
+    }
+
+    public static void extractPages(String line, int from, Map<String, ParsedToken> tokens) {
+        if (from < line.length()) {
+            tokens.put("PAGES", new ParsedToken("PAGES", line.substring(from).trim(), from, line.length()));
+        }
+    }
+
+    public static int extractVolumeInfo(String line, int from, Map<String, ParsedToken> tokens) {
+        int pos = from;
+
+        // Пропускаем ": " если есть
+        if (pos < line.length() && line.charAt(pos) == ':') pos += 2;
+
+        // "в N т." — до "Т. X"
+        int volumeInfoEnd = line.indexOf("Т. ", pos);
+        if (volumeInfoEnd < 0) volumeInfoEnd = line.indexOf("т. ", pos);
+        if (volumeInfoEnd > pos) {
+            tokens.put("VOLUME_INFO", new ParsedToken("VOLUME_INFO", line.substring(pos, volumeInfoEnd).trim(), pos, volumeInfoEnd));
+            pos = volumeInfoEnd;
+        }
+
+        // "Т. X" — до ". — "
+        int volumeEnd = findBlockEnd(line, pos);
+        pos = extractToken(line, pos, volumeEnd, "VOLUME", ". — ", tokens);
+
+        return pos;
     }
 }

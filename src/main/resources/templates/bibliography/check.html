@@ -60,7 +60,6 @@
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
             transition: transform 0.2s, box-shadow 0.2s;
-            margin-top: 0.5rem;
         }
 
         .btn-primary:hover {
@@ -156,6 +155,7 @@
         .success-row:hover {
             background: #f0fef0;
         }
+
         .source-text .error-highlight {
             background: #ffd6db;
             border-bottom: 2px solid #dc3545;
@@ -164,6 +164,7 @@
             border-radius: 3px;
             font-weight: 500;
         }
+
         .source-text .error-highlight:hover {
             background: #ffc0cb;
         }
@@ -180,13 +181,26 @@
                 <i class="bi bi-textarea-t"></i> Исходный список литературы
                 <small class="text-muted fw-normal">(один источник — одна строка)</small>
             </label>
-            <textarea class="form-control" id="sourceText"
-                      name="sourceText" rows="12" placeholder="Пример:&#10;Иванов И.И. Основы программирования. М.: Наука, 2020. 300 с.&#10;Петров П.П., Сидоров С.С. Алгоритмы и структуры данных // Журнал «Информатика». 2019. Том 15. № 3. С. 45-67."
-                      th:text="${page != null ? page.originalText() : ''}"></textarea>
+            <div class="position-relative">
+        <textarea class="form-control" id="sourceText"
+                  name="sourceText" rows="12"
+                  autocomplete="off"
+                  placeholder="Пример:&#10;Иванов И.И. Основы программирования. М.: Наука, 2020. 300 с.&#10;Петров П.П., Сидоров С.С. Алгоритмы и структуры данных // Журнал «Информатика». 2019. Том 15. № 3. С. 45-67."
+                  th:text="${page != null ? page.originalText() : ''}"></textarea>
+                <button type="button"
+                        class="btn btn-sm position-absolute"
+                        style="top: 8px; right: 8px; background: transparent; border: none; color: #adb5bd; font-size: 1.1rem; z-index: 5;"
+                        onclick="clearForm()"
+                        title="Очистить">
+                    <i class="bi bi-x-circle"></i>
+                </button>
+            </div>
         </div>
-        <button type="submit" class="btn btn-primary">
-            Проверить список <i class="fa-solid fa-wand-magic-sparkles fa-lg" style="margin-left: 10px;"></i>
-        </button>
+        <div>
+            <button type="submit" class="btn btn-primary">
+                Проверить список <i class="fa-solid fa-wand-magic-sparkles fa-lg" style="margin-left: 10px;"></i>
+            </button>
+        </div>
     </form>
 
     <th:block th:if="${page != null}">
@@ -214,7 +228,9 @@
                          th:data-error="true"
                          th:data-error-count="${#lists.size(result.errors)}">
                         <div class="d-flex justify-content-between align-items-start mb-2">
-                            <strong class="text-secondary"><i class="bi bi-hash"></i> Строка <span th:text="${result.lineNumber}"></span></strong>
+                            <strong class="text-secondary">
+                                <i class="bi bi-hash"></i> Строка <span th:text="${result.lineNumber}"></span></strong>
+                            <span class="ms-2 text-muted" style="font-size: 0.85rem;" th:text="${result.sourceType()}">Тип</span>
                             <span class="badge bg-danger-subtle text-danger border border-danger-subtle error-count-badge"
                                   style="font-size: 0.7rem; padding: 0.25rem 0.6rem;">
                         <i class="bi bi-exclamation-triangle-fill me-1"></i>
@@ -229,8 +245,10 @@
                                     <i class="bi bi-exclamation-circle-fill text-danger me-1"></i>
                                     <span class="text-danger" th:text="${error.message}"></span>
                                 </div>
-                                <div th:if="${error.expectedView != null}" class="text-muted mt-1" style="margin-left: 0;">
-                                    <i class="bi bi-eye-fill"></i> Ожидается: <code th:text="${error.expectedView}"></code>
+                                <div th:if="${error.expectedView != null}" class="text-muted mt-1"
+                                     style="margin-left: 0;">
+                                    <i class="bi bi-eye-fill"></i> Ожидается: <code
+                                        th:text="${error.expectedView}"></code>
                                 </div>
                             </div>
                         </div>
@@ -256,13 +274,17 @@
                     <div th:each="result : ${page.results}" th:if="!${result.typeDetected}"
                          class="border-bottom p-3 unknown-row" th:data-unknown="true">
                         <div class="d-flex justify-content-between align-items-start mb-2">
-                            <strong class="text-secondary"><i class="bi bi-hash"></i> Строка <span th:text="${result.lineNumber}"></span></strong>
-                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" style="font-size: 0.7rem; padding: 0.25rem 0.6rem;">
+                            <strong class="text-secondary"><i class="bi bi-hash"></i> Строка <span
+                                    th:text="${result.lineNumber}"></span></strong>
+                            <span class="ms-2 text-muted" style="font-size: 0.85rem;" th:text="${result.sourceType()}">Тип</span>
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle"
+                                  style="font-size: 0.7rem; padding: 0.25rem 0.6rem;">
                         <i class="bi bi-question-diamond-fill me-1"></i> Не распознано
                     </span>
                         </div>
                         <div class="source-text mb-2" th:utext="${result.highlightedHtml}"></div>
-                        <div class="d-flex align-items-start gap-2" style="border-left: 2px solid #ce7e04; padding-left: 10px;">
+                        <div class="d-flex align-items-start gap-2"
+                             style="border-left: 2px solid #ce7e04; padding-left: 10px;">
                             <i class="bi bi-lightbulb-fill text-warning mt-1 flex-shrink-0"></i>
                             <span class="text-warning">Не удалось определить тип источника</span>
                         </div>
@@ -288,14 +310,18 @@
                     <div th:each="result : ${page.results}" th:if="${!result.hasErrors and result.typeDetected}"
                          class="border-bottom p-3 success-row" th:data-success="true">
                         <div class="d-flex justify-content-between align-items-start mb-2">
-                            <strong class="text-secondary"><i class="bi bi-hash"></i> Строка <span th:text="${result.lineNumber}"></span></strong>
-                            <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle" style="font-size: 0.7rem; padding: 0.25rem 0.6rem;">
+                            <strong class="text-secondary"><i class="bi bi-hash"></i> Строка <span
+                                    th:text="${result.lineNumber}"></span></strong>
+                            <span class="ms-2 text-muted" style="font-size: 0.85rem;" th:text="${result.sourceType()}">Тип</span>
+                            <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle"
+                                  style="font-size: 0.7rem; padding: 0.25rem 0.6rem;">
                         <i class="bi bi-check-circle-fill me-1"></i> Корректно
                     </span>
                         </div>
                         <div class="source-text mt-2" th:utext="${result.highlightedHtml}"></div>
                     </div>
-                    <div th:if="${page.totalLines == page.totalErrors + page.linesWithUnknownType}" class="p-4 text-center text-muted">
+                    <div th:if="${page.totalLines == page.totalErrors + page.linesWithUnknownType}"
+                         class="p-4 text-center text-muted">
                         Нет корректных строк
                     </div>
                 </div>
@@ -308,7 +334,8 @@
             <i class="bi bi-journal-bookmark-fill" style="font-size: 3rem;"></i>
             <p class="mt-3">Вставьте список литературы и нажмите «Проверить список»</p>
             <small class="d-block text-muted">
-                <i class="bi bi-info-circle-fill"></i> Поддерживаются книги, статьи, диссертации, электронные ресурсы и другие типы источников
+                <i class="bi bi-info-circle-fill"></i> Поддерживаются книги, статьи, диссертации, электронные ресурсы и
+                другие типы источников
             </small>
         </div>
     </th:block>
@@ -333,7 +360,7 @@
         return 'ошибок';
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // 1. Обработка баджей с количеством ошибок
         const errorBadges = document.querySelectorAll('[data-error="true"]');
         errorBadges.forEach(badge => {
@@ -361,6 +388,11 @@
         const correctCount = totalLines - errorsCount - unknownCount;
         document.getElementById('successCount').innerText = '(' + correctCount + ')';
     });
+
+    function clearForm() {
+        document.getElementById('sourceText').value = '';
+        document.querySelectorAll('.accordion-collapse').forEach(el => el.classList.remove('show'));
+    }
 </script>
 </body>
 </html>

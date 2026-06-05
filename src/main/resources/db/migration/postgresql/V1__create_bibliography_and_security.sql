@@ -1,7 +1,5 @@
--- ============================================
--- Модуль: security
--- ============================================
-CREATE TABLE security_users (
+
+CREATE TABLE IF NOT EXISTS security_users (
     id BIGSERIAL PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     password_hash VARCHAR(100) NOT NULL,
@@ -11,19 +9,19 @@ CREATE TABLE security_users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
--- ============================================
--- Модуль: bibliography
--- ============================================
-CREATE TABLE bibliography_rules (
+CREATE TABLE IF NOT EXISTS bibliography_rules (
     id BIGSERIAL PRIMARY KEY,
     code VARCHAR(50) NOT NULL UNIQUE,
     name VARCHAR(150) NOT NULL,
     source_types VARCHAR(200),
     example_text TEXT NOT NULL,
-    description TEXT
+    description TEXT,
+    target_token VARCHAR(50),
+    search_pattern VARCHAR(500),
+    expected_view TEXT
 );
 
-CREATE TABLE bibliography_validation_sessions (
+CREATE TABLE IF NOT EXISTS bibliography_validation_sessions (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL REFERENCES security_users(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -32,7 +30,7 @@ CREATE TABLE bibliography_validation_sessions (
     unknown_count INT DEFAULT 0 NOT NULL
 );
 
-CREATE TABLE bibliography_validation_lines (
+CREATE TABLE IF NOT EXISTS bibliography_validation_lines (
     id BIGSERIAL PRIMARY KEY,
     session_id BIGINT NOT NULL REFERENCES bibliography_validation_sessions(id) ON DELETE CASCADE,
     line_number INT NOT NULL,
@@ -42,7 +40,7 @@ CREATE TABLE bibliography_validation_lines (
     is_valid BOOLEAN NOT NULL
 );
 
-CREATE TABLE bibliography_line_errors (
+CREATE TABLE IF NOT EXISTS bibliography_line_errors (
     id BIGSERIAL PRIMARY KEY,
     line_id BIGINT NOT NULL REFERENCES bibliography_validation_lines(id) ON DELETE CASCADE,
     rule_code VARCHAR(50) REFERENCES bibliography_rules(code),

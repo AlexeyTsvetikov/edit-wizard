@@ -10,11 +10,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Component
-public class ArticleJournalAuthorsFirstParser implements BibliographyParser {
+public class NewspaperParser implements BibliographyParser {
 
     @Override
     public boolean canParse(SourceType type) {
-        return type == SourceType.ARTICLE_JOURNAL_AUTHORS_FIRST;
+        return type == SourceType.NEWSPAPER_ARTICLE;
     }
 
     @Override
@@ -24,16 +24,16 @@ public class ArticleJournalAuthorsFirstParser implements BibliographyParser {
 
         int pos = TokenExtractor.extractAuthorsAndTitle(line, tokens);
 
-        int journalEnd = TokenExtractor.findBlockEnd(line, pos);
-        pos = TokenExtractor.extractToken(line, pos, journalEnd, "JOURNAL", ". — ", tokens);
+        int newspaperEnd = TokenExtractor.findBlockEnd(line, pos);
+        pos = TokenExtractor.extractToken(line, pos, newspaperEnd, "NEWSPAPER", ". — ", tokens);
 
         pos = TokenExtractor.extractYear(line, pos, tokens);
 
-        int issueEnd = TokenExtractor.findBlockEnd(line, pos);
-        pos = TokenExtractor.extractToken(line, pos, issueEnd, "ISSUE", ". — ", tokens);
+        int dateEnd = TokenExtractor.findBlockEnd(line, pos);
+        pos = TokenExtractor.extractToken(line, pos, dateEnd, "DATE", ". — ", tokens);
 
         TokenExtractor.extractPages(line, pos, tokens);
 
-        return new ParsedRecord(SourceType.ARTICLE_JOURNAL_AUTHORS_FIRST, rawLine, tokens);
+        return new ParsedRecord(SourceType.NEWSPAPER_ARTICLE, rawLine, tokens);
     }
 }

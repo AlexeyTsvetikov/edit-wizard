@@ -3,8 +3,17 @@ package ru.tsvetikov.editwizard.bibliography.engine.classifier;
 import org.springframework.stereotype.Component;
 import ru.tsvetikov.editwizard.bibliography.engine.model.SourceType;
 
+import java.util.List;
+
 @Component
 public class SourceClassifier {
+
+    private static final List<String> MONTHS = List.of(
+            "января", "февраля", "марта", "апреля", "мая", "июня",
+            "июля", "августа", "сентября", "октября", "ноября", "декабря",
+            "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+            "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+    );
 
     public SourceType classify(String rawLine) {
         if (rawLine == null || rawLine.isBlank()) {
@@ -22,17 +31,16 @@ public class SourceClassifier {
         if (isGost(line)) return SourceType.GOST;
 
         if (isRules(line)) return SourceType.RULES;
+        if (isLegal(line)) return SourceType.LEGAL;
 
-        if (isElectronicCourse(line)) return SourceType.ELECTRONIC_COURSE;
         if (isElectronicLocal(line)) return SourceType.ELECTRONIC_LOCAL;
+        if (isElectronicCourse(line)) return SourceType.ELECTRONIC_COURSE;
         if (isElectronicWithDOI(line)) return SourceType.ELECTRONIC_ARTICLE_DOI;
-        if (isElectronicBook(line)) return SourceType.ELECTRONIC_BOOK;
         if (isElectronicNewspaper(line)) return SourceType.ELECTRONIC_NEWSPAPER;
         if (isElectronicJournal(line)) return SourceType.ELECTRONIC_JOURNAL;
         if (isElectronicPortal(line)) return SourceType.ELECTRONIC_PORTAL;
+        if (isElectronicBook(line)) return SourceType.ELECTRONIC_BOOK;
         if (isWebsite(line)) return SourceType.ELECTRONIC_WEBSITE;
-
-        if (isLegal(line)) return SourceType.LEGAL;
 
         if (isStatistical(line)) return SourceType.STATISTICAL_COLLECTION;
 
@@ -60,9 +68,9 @@ public class SourceClassifier {
         return SourceType.UNKNOWN;
     }
 
-
     private boolean isArchive(String line) {
-        return line.matches("^[А-ЯЁ]+\\..*Ф\\.\\s*\\d+.*Оп\\.\\s*\\d+.*Д\\.\\s*\\d+.*Л\\.\\s*\\d+");
+        return line.startsWith("ГАРФ")
+               || (line.contains("Ф.") && line.contains("Оп.") && line.contains("Д.") && line.contains("Л."));
     }
 
     private boolean isPatent(String line) {
@@ -97,7 +105,7 @@ public class SourceClassifier {
     }
 
     private boolean isElectronicNewspaper(String line) {
-        return line.contains("URL:") && (line.contains("газета") || line.contains("Газета") || line.contains("газ."));
+        return line.contains("URL:") && isNewspaper(line);
     }
 
     private boolean isElectronicJournal(String line) {
@@ -109,7 +117,10 @@ public class SourceClassifier {
     }
 
     private boolean isWebsite(String line) {
-        return line.contains("URL:") && !line.contains("//") && !line.contains("статья");
+        return line.contains("URL:")
+               && !line.contains(" // ")
+               && !line.contains("статья")
+               && !line.contains("газета");
     }
 
     private boolean isLegal(String line) {
@@ -142,17 +153,25 @@ public class SourceClassifier {
     }
 
     private boolean isChapter(String line) {
-        return line.contains("учебник") && !line.contains("//");
+        return line.contains("учебник")
+               || line.contains("учеб. пособие")
+               || line.contains("монография")
+               || line.contains("сборник");
     }
 
     private boolean isCollection(String line) {
-        return line.contains("конф.") || line.contains("материалы");
+        return line.contains("конф.")
+               || line.contains("материалы")
+               || line.contains("сборник")
+               || line.contains("межвуз");
     }
 
     private boolean isNewspaper(String line) {
-        return line.contains("газета") || line.contains("газ.")
-               || line.matches(".*\\d{1,2}\\s+(января|февраля|марта|апреля|мая|июня|июля|" +
-                               "августа|сентября|октября|ноября|декабря).*");
+        if (line.contains("газета") || line.contains("газ.") || line.contains("Газета")) return true;
+        for (String month : MONTHS) {
+            if (line.contains(month)) return true;
+        }
+        return false;
     }
 
     private boolean isMultivolume(String line) {

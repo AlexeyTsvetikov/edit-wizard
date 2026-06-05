@@ -10,10 +10,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Component
-public class BookAuthorsFirstParser implements BibliographyParser {
+public class MultivolumeParser implements BibliographyParser {
 
     @Override
-    public boolean canParse(SourceType type) { return type == SourceType.BOOK_AUTHORS_FIRST; }
+    public boolean canParse(SourceType type) {
+        return type == SourceType.MULTIVOLUME;
+    }
 
     @Override
     public ParsedRecord parse(String rawLine) {
@@ -22,11 +24,14 @@ public class BookAuthorsFirstParser implements BibliographyParser {
 
         int pos = TokenExtractor.extractAuthors(line, tokens);
 
-        int titleEnd = line.indexOf(". —", pos);
-        if (titleEnd < 0) titleEnd = line.indexOf(" —", pos);
-        pos = TokenExtractor.extractToken(line, pos, titleEnd, "TITLE", ". — ", tokens);
+        // Заглавие — до ": в N т."
+        int titleEnd = line.indexOf(": в ", pos);
+        if (titleEnd < 0) titleEnd = line.indexOf(": В ", pos);
+        pos = TokenExtractor.extractToken(line, pos, titleEnd, "TITLE", "", tokens);
+        if (pos < line.length() && line.charAt(pos) == ':') pos += 2;
 
+        pos = TokenExtractor.extractVolumeInfo(line, pos, tokens);
         TokenExtractor.extractBookTail(line, pos, tokens);
-        return new ParsedRecord(SourceType.BOOK_AUTHORS_FIRST, rawLine, tokens);
+        return new ParsedRecord(SourceType.MULTIVOLUME, rawLine, tokens);
     }
 }

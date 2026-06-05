@@ -32,6 +32,6 @@ public class BibliographyLineError {
     @Column(name = "error_message", nullable = false)
     private String errorMessage;
 
-    @Column(name = "expected_view", columnDefinition = "TEXT")
+    @Column(name = "expected_view", length = 4000)
     private String expectedView;
 }

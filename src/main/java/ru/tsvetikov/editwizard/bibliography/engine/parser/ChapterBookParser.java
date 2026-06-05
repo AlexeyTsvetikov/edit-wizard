@@ -10,10 +10,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Component
-public class BookAuthorsFirstParser implements BibliographyParser {
+public class ChapterBookParser implements BibliographyParser {
 
     @Override
-    public boolean canParse(SourceType type) { return type == SourceType.BOOK_AUTHORS_FIRST; }
+    public boolean canParse(SourceType type) {
+        return type == SourceType.CHAPTER_BOOK;
+    }
 
     @Override
     public ParsedRecord parse(String rawLine) {
@@ -22,11 +24,16 @@ public class BookAuthorsFirstParser implements BibliographyParser {
 
         int pos = TokenExtractor.extractAuthors(line, tokens);
 
-        int titleEnd = line.indexOf(". —", pos);
-        if (titleEnd < 0) titleEnd = line.indexOf(" —", pos);
-        pos = TokenExtractor.extractToken(line, pos, titleEnd, "TITLE", ". — ", tokens);
+        // Название главы — до " // "
+        int chapterEnd = line.indexOf(" // ", pos);
+        pos = TokenExtractor.extractToken(line, pos, chapterEnd, "CHAPTER", "", tokens);
+        if (pos < line.length() && line.startsWith(" // ", pos)) pos += 4;
+
+        // Название книги — до ". — "
+        int bookEnd = TokenExtractor.findBlockEnd(line, pos);
+        pos = TokenExtractor.extractToken(line, pos, bookEnd, "BOOK_TITLE", ". — ", tokens);
 
         TokenExtractor.extractBookTail(line, pos, tokens);
-        return new ParsedRecord(SourceType.BOOK_AUTHORS_FIRST, rawLine, tokens);
+        return new ParsedRecord(SourceType.CHAPTER_BOOK, rawLine, tokens);
     }
 }
