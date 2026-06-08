@@ -41,8 +41,9 @@ public class BibliographyService {
         int unknownCount = 0;
 
         for (int i = 0; i < nonEmptyLines.size(); i++) {
-            String line = nonEmptyLines.get(i);
-            ValidationResult result = engine.process(line, i + 1, domainRules);
+            String rawLine = nonEmptyLines.get(i);
+            String line = stripNumber(rawLine);
+                ValidationResult result = engine.process(line, i + 1, domainRules);
             results.add(result);
             if (result.hasErrors()) errorCount++;
             if (!result.typeDetected()) unknownCount++;
@@ -67,6 +68,11 @@ public class BibliographyService {
                 entity.getExpectedView(),
                 entity.getSourceTypes()
         );
+    }
+
+    private String stripNumber(String line) {
+        if (line == null || line.isBlank()) return line;
+        return line.replaceFirst("^\\[?\\d+]?\\.?\\s*", "").trim();
     }
 
     private ValidationPage emptyPage() {

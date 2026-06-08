@@ -58,12 +58,16 @@ public class TokenExtractor {
         int pos = 0;
 
         int titleEnd = findTitleBeforeSlash(line, pos);
-        tokens.put("TITLE", new ParsedToken("TITLE", line.substring(pos, titleEnd).trim(), pos, titleEnd));
-        pos = titleEnd + 3;
+        if (titleEnd > pos) {
+            tokens.put("TITLE", new ParsedToken("TITLE", line.substring(pos, titleEnd).trim(), pos, titleEnd));
+            pos = titleEnd + 3;
+        }
 
         int blockEnd = findBlockEnd(line, pos);
-        tokens.put(tokenCode, new ParsedToken(tokenCode, line.substring(pos, blockEnd).trim(), pos, blockEnd));
-        pos = skipDelimiter(line, blockEnd, ". — ");
+        if (blockEnd > pos) {
+            tokens.put(tokenCode, new ParsedToken(tokenCode, line.substring(pos, blockEnd).trim(), pos, blockEnd));
+            pos = skipDelimiter(line, blockEnd, ". — ");
+        }
 
         return pos;
     }
@@ -117,10 +121,12 @@ public class TokenExtractor {
             }
         }
 
-        // Страницы
         if (pos < line.length()) {
             String value = line.substring(pos).trim();
             tokens.put("PAGES", new ParsedToken("PAGES", value, pos, line.length()));
+        } else {
+            // Создаём пустой токен, чтобы правила могли найти ошибку
+            tokens.put("PAGES", new ParsedToken("PAGES", "", pos, pos));
         }
     }
 
@@ -187,6 +193,26 @@ public class TokenExtractor {
         int volumeEnd = findBlockEnd(line, pos);
         pos = extractToken(line, pos, volumeEnd, "VOLUME", ". — ", tokens);
 
+        return pos;
+    }
+
+    public static int extractResponsibility(String line, int from, Map<String, ParsedToken> tokens) {
+        int pos = from;
+        if (pos < line.length() && line.startsWith(" / ", pos)) {
+            pos += 3;
+            int end = findBlockEnd(line, pos);
+            if (end < 0) {
+                end = line.indexOf(" // ", pos);
+            }
+            if (end < 0) {
+                end = line.length();
+            }
+            if (end > pos) {
+                String value = line.substring(pos, end).trim();
+                tokens.put("RESPONSIBILITY", new ParsedToken("RESPONSIBILITY", value, pos, end));
+                pos = end;
+            }
+        }
         return pos;
     }
 }

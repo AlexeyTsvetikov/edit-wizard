@@ -2,6 +2,8 @@ package ru.tsvetikov.editwizard.bibliography.engine.highlight;
 
 import org.springframework.stereotype.Component;
 import ru.tsvetikov.editwizard.core.dto.ValidationError;
+
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -16,7 +18,11 @@ public class HtmlHighlighter {
             return escapeHtml(rawLine);
         }
 
-        List<ValidationError> sorted = errors.stream()
+        // Объединяем пересекающиеся ошибки
+        List<ValidationError> merged = mergeOverlapping(errors, rawLine);
+
+        // Сортируем от конца к началу
+        List<ValidationError> sorted = merged.stream()
                 .sorted(Comparator.comparingInt(ValidationError::charStart).reversed())
                 .toList();
 
@@ -33,6 +39,43 @@ public class HtmlHighlighter {
         }
 
         return sb.toString();
+    }
+
+    private List<ValidationError> mergeOverlapping(List<ValidationError> errors, String rawLine) {
+        if (errors.size() <= 1) return new ArrayList<>(errors);
+
+        List<ValidationError> sorted = errors.stream()
+                .sorted(Comparator.comparingInt(ValidationError::charStart))
+                .toList();
+
+        List<ValidationError> merged = new ArrayList<>();
+        ValidationError current = sorted.getFirst();
+
+        for (int i = 1; i < sorted.size(); i++) {
+            ValidationError next = sorted.get(i);
+            if (next.charStart() <= current.charEnd()) {
+                int newStart = Math.min(current.charStart(), next.charStart());
+                int newEnd = Math.max(current.charEnd(), next.charEnd());
+                String combinedMessage = current.message();
+                if (!current.message().equals(next.message())) {
+                    combinedMessage += "; " + next.message();
+                }
+                String combinedExpected = current.expectedView() != null ? current.expectedView() : next.expectedView();
+                current = new ValidationError(
+                        current.ruleCode(),
+                        combinedMessage,
+                        combinedExpected,
+                        newStart,
+                        newEnd,
+                        rawLine.substring(newStart, newEnd)
+                );
+            } else {
+                merged.add(current);
+                current = next;
+            }
+        }
+        merged.add(current);
+        return merged;
     }
 
     public String highlightUnknown(String rawLine) {

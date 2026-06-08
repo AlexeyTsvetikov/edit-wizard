@@ -21,6 +21,7 @@ public class BibliographyEngine {
     private final List<BibliographyParser> parsers;
     private final RulesEngine rulesEngine;
     private final HtmlHighlighter highlighter;
+    private final ContextRulesEngine contextRulesEngine;
 
     public ValidationResult process(String rawLine, int lineNumber, List<Rule> rules) {
         if (rawLine == null || rawLine.isBlank()) {
@@ -28,7 +29,6 @@ public class BibliographyEngine {
         }
 
         SourceType type = classifier.classify(rawLine);
-        System.out.println(">>> Тип: " + type);
         if (type == SourceType.UNKNOWN) {
             return new ValidationResult(
                     lineNumber,
@@ -55,6 +55,7 @@ public class BibliographyEngine {
         ParsedRecord record = parser.parse(rawLine);
 
         var errors = rulesEngine.apply(record, rules);
+        errors.addAll(contextRulesEngine.validate(record));
 
         String html = errors.isEmpty()
                 ? highlighter.highlight(rawLine, List.of())

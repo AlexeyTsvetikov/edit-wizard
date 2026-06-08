@@ -32,6 +32,13 @@ public class RulesEngine {
                 if (token != null) {
                     errors.addAll(applyToToken(rule, token));
                 }
+                // Для правил авторов проверяем также RESPONSIBILITY
+                if ("AUTHORS".equals(rule.targetToken())) {
+                    ParsedToken respToken = record.getToken("RESPONSIBILITY");
+                    if (respToken != null) {
+                        errors.addAll(applyToToken(rule, respToken));
+                    }
+                }
             }
         }
         return errors;
@@ -61,8 +68,19 @@ public class RulesEngine {
 
     private List<ValidationError> applyToLine(Rule rule, String rawLine) {
         List<ValidationError> errors = new ArrayList<>();
+
+        // Для правила SINGLE_SLASH исключаем URL из проверки
+        String checkLine = rawLine;
+        if (rule.code().equals("SINGLE_SLASH_INSTEAD_OF_DOUBLE")) {
+            int urlIndex = checkLine.indexOf("URL:");
+            if (urlIndex >= 0) {
+                checkLine = checkLine.substring(0, urlIndex);
+            }
+            checkLine = checkLine.replaceAll("(?<=[А-ЯЁ][а-яё]?)/", ".");
+        }
+
         Pattern pattern = Pattern.compile(rule.searchPattern());
-        Matcher matcher = pattern.matcher(rawLine);
+        Matcher matcher = pattern.matcher(checkLine);
 
         while (matcher.find()) {
             errors.add(new ValidationError(
@@ -71,10 +89,9 @@ public class RulesEngine {
                     rule.expectedView(),
                     matcher.start(),
                     matcher.end(),
-                    rawLine.substring(matcher.start(), matcher.end())
+                    checkLine.substring(matcher.start(), matcher.end())
             ));
         }
-
         return errors;
     }
 }

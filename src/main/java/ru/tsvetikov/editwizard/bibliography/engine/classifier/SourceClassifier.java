@@ -60,7 +60,7 @@ public class SourceClassifier {
             return SourceType.ARTICLE_JOURNAL_AUTHORS_FIRST;
         }
 
-        if (hasTitleFirst(line)) return SourceType.BOOK_TITLE_FIRST;
+        if (hasTitleFirst(line) && !hasAuthors(line)) return SourceType.BOOK_TITLE_FIRST;
         if (isMultivolume(line)) return SourceType.MULTIVOLUME;
 
         if (hasAuthors(line)) return SourceType.BOOK_AUTHORS_FIRST;
@@ -98,10 +98,8 @@ public class SourceClassifier {
     }
 
     private boolean isElectronicBook(String line) {
-        return line.contains("ЭБС") || line.contains("e.lanbook") || line.contains("URL:") && (line.contains("учеб.")
-                                                                                               || line.contains("монография")
-                                                                                               || line.contains("изд-во")
-                                                                                               || line.contains("Издательство"));
+        return (line.contains("ЭБС") || line.contains("e.lanbook") || line.contains("[Электронный ресурс]"))
+               && !line.contains("URL:");
     }
 
     private boolean isElectronicNewspaper(String line) {
@@ -176,7 +174,8 @@ public class SourceClassifier {
 
     private boolean isMultivolume(String line) {
         return line.contains("в 2 т.") || line.contains("в 3 т.") || line.contains("в 4 т.")
-               || line.contains("в 5 т.") || line.contains("в 12 т.") || line.contains("Т.");
+               || line.contains("в 5 т.") || line.contains("в 12 т.")
+               || (line.contains("Т.") && line.matches(".*[вВ]\\s*\\d+\\s*т\\.\\s*Т\\.\\s*\\d+.*"));
     }
 
     private boolean isUnderEditor(String line) {
@@ -188,11 +187,22 @@ public class SourceClassifier {
     }
 
     private boolean hasTitleFirst(String line) {
-        return !line.matches("^[А-ЯЁ][а-яё]+\\s+[А-ЯЁ]\\..*")
+        return !line.matches("^[А-ЯЁ]\\.[А-ЯЁ]\\.")
+               && !line.matches("^[А-ЯЁ][а-яё]+\\s+[А-ЯЁ]\\.")
+               && !line.matches("^[A-Z][a-z]+\\s+[A-Z]\\.")
                && line.contains(" / ");
     }
 
     private boolean hasAuthors(String line) {
-        return line.matches("^[А-ЯЁа-яё][а-яё]+\\s+[А-ЯЁ]\\.?\\s?[А-ЯЁ]\\..*");
+        if (!line.matches("^[А-ЯЁA-Z].*")) return false;
+
+        return line.matches("^[А-ЯЁ][а-яё]+\\s+[А-ЯЁ]\\..*")  // Фамилия И.
+               || line.matches("^[А-ЯЁ]\\.[А-ЯЁ]\\.[А-ЯЁ][а-яё]+.*")  // И.О. Фамилия
+               || line.matches("^[А-ЯЁ][а-яё]+\\s+[А-ЯЁ]\\.[А-ЯЁ]\\.\\s*,.*")  // Фамилия И.О., ...
+               || line.matches("^[А-ЯЁ][а-яё]+\\s+[А-ЯЁ]\\s*,.*")  // Фамилия И, (без точки)
+               || line.matches("^[А-ЯЁ][а-яё]+\\s+[А-ЯЁ][а-яё]+\\s*,.*")  // Фамилия Иж, (сокращение)
+               || line.matches("^[А-ЯЁ][а-яё]+\\.?\\s+[А-ЯЁ]\\.,.*")  // Фамилия. И., (точка после фамилии)
+               || line.matches("^[А-ЯЁ][а-яё]+\\.?\\s+[А-ЯЁ][а-яё]*\\.?\\s*,.*")  // Фамилия. Имя., или Фамилия Имя,
+               || (line.contains(", ") && line.matches("^[А-ЯЁ][а-яё]+\\s+[А-ЯЁ][а-яё]+.*"));  // Имя Фамилия, Имя Фамилия (полные)
     }
 }
