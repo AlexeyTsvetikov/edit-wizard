@@ -19,6 +19,12 @@ public class RulesEngine {
         String sourceType = record.sourceType().name();
 
         for (Rule rule : rules) {
+            if (rule.code().equals("CITY_NOT_ABBREVIATED")) {
+                System.out.println(">>> CITY rule: targetToken=" + rule.targetToken() + " hasToken=" + (record.getToken("CITY") != null));
+                if (record.getToken("CITY") != null) {
+                    System.out.println(">>> CITY value: '" + record.getToken("CITY").value() + "'");
+                }
+            }
             if (rule.sourceTypes() != null && !rule.sourceTypes().isBlank()) {
                 if (!List.of(rule.sourceTypes().split(",")).contains(sourceType)) {
                     continue;

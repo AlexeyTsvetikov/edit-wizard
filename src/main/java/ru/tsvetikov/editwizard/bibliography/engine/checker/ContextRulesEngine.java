@@ -1,4 +1,4 @@
-package ru.tsvetikov.editwizard.bibliography.engine;
+package ru.tsvetikov.editwizard.bibliography.engine.checker;
 
 import org.springframework.stereotype.Component;
 import ru.tsvetikov.editwizard.bibliography.engine.model.ParsedRecord;

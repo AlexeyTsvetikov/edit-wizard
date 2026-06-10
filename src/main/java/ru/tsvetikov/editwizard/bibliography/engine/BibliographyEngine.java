@@ -2,6 +2,8 @@ package ru.tsvetikov.editwizard.bibliography.engine;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import ru.tsvetikov.editwizard.bibliography.engine.checker.AbbreviationChecker;
+import ru.tsvetikov.editwizard.bibliography.engine.checker.ContextRulesEngine;
 import ru.tsvetikov.editwizard.bibliography.engine.classifier.SourceClassifier;
 import ru.tsvetikov.editwizard.bibliography.engine.highlight.HtmlHighlighter;
 import ru.tsvetikov.editwizard.bibliography.engine.model.ParsedRecord;
@@ -21,6 +23,7 @@ public class BibliographyEngine {
     private final List<BibliographyParser> parsers;
     private final RulesEngine rulesEngine;
     private final HtmlHighlighter highlighter;
+    private final AbbreviationChecker abbreviationChecker;
     private final ContextRulesEngine contextRulesEngine;
 
     public ValidationResult process(String rawLine, int lineNumber, List<Rule> rules) {
@@ -56,6 +59,7 @@ public class BibliographyEngine {
 
         var errors = rulesEngine.apply(record, rules);
         errors.addAll(contextRulesEngine.validate(record));
+        errors.addAll(abbreviationChecker.check(record));
 
         String html = errors.isEmpty()
                 ? highlighter.highlight(rawLine, List.of())

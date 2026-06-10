@@ -99,6 +99,10 @@ public class TokenExtractor {
         int cityEnd = line.indexOf(":", pos);
         if (cityEnd > pos) {
             String value = line.substring(pos, cityEnd).trim();
+            if (value.startsWith(". — ")) {
+                value = value.substring(4);
+                pos += 4;
+            }
             tokens.put("CITY", new ParsedToken("CITY", value, pos, cityEnd));
             pos = skipDelimiter(line, cityEnd, ": ");
         }
