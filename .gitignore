@@ -36,3 +36,8 @@ build/
 
 ### Mac OS ###
 .DS_Store
+/data/
+/src/main/resources/db/migration/h2/
+application-dev.yml
+application-prod.yml
+application.yml
